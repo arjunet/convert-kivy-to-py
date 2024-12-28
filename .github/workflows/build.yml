@@ -82,7 +82,7 @@ jobs:
           sdkmanager --update
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "build-tools;29.0.3"
 
-      # Step 9: Install Android NDK to get aidl tool
+      # Step 9: Install Android NDK (includes aidl)
       - name: Install Android NDK (includes aidl)
         run: |
           sdkmanager "ndk;21.3.6528147" # Install NDK version that includes aidl tool
