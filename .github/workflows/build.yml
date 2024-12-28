@@ -33,14 +33,14 @@ jobs:
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
 
-      # Step 5: Set up Android SDK
+      # Step 5: Set up Android SDK (updated package names)
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
-          packages: tools, platform-tools, build-tools;30.0.3, platforms;android-30
+          packages: platform-tools, build-tools;30.0.3, platforms;android-30
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
           PATH: $JAVA_HOME/bin:$PATH
