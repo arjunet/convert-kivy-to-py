@@ -4,70 +4,38 @@ on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      # Step 1: Checkout code
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      # Step 2: Install Python 3.10 explicitly
-      - name: Install Python 3.10
-        run: |
-          sudo apt update
-          sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
-          python3.10 --version
-          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-          sudo update-alternatives --set python3 /usr/bin/python3.10
-          python3 --version
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential git zlib1g-dev libncurses5-dev libgdbm-dev \
+          libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl \
+          libbz2-dev openjdk-11-jdk mkdir unzip
+        pip install --upgrade pip
+        pip install buildozer
 
-      # Step 3: Install essential tools and Buildozer dependencies
-      - name: Install Essential Tools and Buildozer Dependencies
-        run: |
-          sudo apt install -y build-essential git zlib1g-dev libncurses5-dev libgdbm-dev \
-                              libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl \
-                              libbz2-dev openjdk-11-jdk unzip
-          pip install --upgrade pip
-          pip install buildozer
+    - name: Install Android SDK
+      run: |
+        mkdir -p ~/.buildozer/android/platform
+        curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o cmdline-tools.zip
+        unzip -q cmdline-tools.zip -d ~/.buildozer/android/platform/
+        mkdir -p ~/.buildozer/android/platform/cmdline-tools/latest
+        mv ~/.buildozer/android/platform/cmdline-tools/* ~/.buildozer/android/platform/cmdline-tools/latest
+        yes | ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
+        ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager \
+          "platform-tools" \
+          "platforms;android-31" \
+          "build-tools;31.0.0" \
+          "ndk;21.3.6528147"
 
-      # Step 4: Check if mkdir is available and install SDK
-      - name: Check mkdir command
-        run: |
-          which mkdir || echo "mkdir command not found"
-          mkdir -p ~/.buildozer/android/platform
-
-      # Step 5: Install Android SDK
-      - name: Install Android SDK
-        run: |
-          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o cmdline-tools.zip
-          unzip -q cmdline-tools.zip -d ~/.buildozer/android/platform/
-          mkdir -p ~/.buildozer/android/platform/cmdline-tools/latest
-          mv ~/.buildozer/android/platform/cmdline-tools/* ~/.buildozer/android/platform/cmdline-tools/latest
-          yes | ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
-          ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-31" \
-            "build-tools;31.0.0" \
-            "ndk;21.3.6528147"
-        env:
-          ANDROID_HOME: ~/.buildozer/android/platform
-          PATH: $PATH:~/.buildozer/android/platform/cmdline-tools/latest/bin:~/.buildozer/android/platform/tools
-
-      # Step 6: Build the APK
-      - name: Build APK
-        run: |
-          buildozer android debug
-        env:
-          ANDROID_HOME: ~/.buildozer/android/platform
-          PATH: $PATH:~/.buildozer/android/platform/cmdline-tools/latest/bin:~/.buildozer/android/platform/tools
-
-      # Step 7: Upload APK as an Artifact
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: MyApp-debug.apk
-          path: bin/*.apk
+    - name: Build APK
+      run: |
+        buildozer -v android debug
