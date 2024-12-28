@@ -80,24 +80,45 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 8: Verify Android SDK installation
+      # Step 8: Update SDK Manager
+      - name: Update SDK Manager
+        run: |
+          sdkmanager --update
+
+      # Step 9: Force Accept SDK licenses
+      - name: Accept SDK licenses
+        run: |
+          yes | sdkmanager --licenses
+
+      # Step 10: Install SDK components with HTTP
+      - name: Install SDK components with HTTP
+        run: |
+          sdkmanager --no_https "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+
+      # Step 11: Set permissions for SDK folder
+      - name: Set permissions for SDK folder
+        run: |
+          sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+          sudo chmod -R 755 /usr/local/lib/android/sdk
+
+      # Step 12: Verify Android SDK installation
       - name: Verify Android SDK installation
         run: |
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 9: Install Buildozer and Cython
+      # Step 13: Install Buildozer and Cython
       - name: Install Buildozer and Cython
         run: |
           python -m pip install cython
           python -m pip install buildozer
 
-      # Step 10: Build APK
+      # Step 14: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 11: Upload APK as an artifact
+      # Step 15: Upload APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
