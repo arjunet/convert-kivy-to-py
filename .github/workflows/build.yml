@@ -1,4 +1,4 @@
-name: Build APK with Buildozer
+name: Android Build
 
 on:
   push:
@@ -6,67 +6,12 @@ on:
       - main
 
 jobs:
-  build:
+  setup_android_sdk:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Check out the repository
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up Python 3.12
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-
-      # Step 3: Install required dependencies
-      - name: Install required dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            libssl-dev \
-            libffi-dev \
-            python3-dev \
-            zip \
-            unzip \
-            openjdk-8-jdk \
-            libncurses5-dev \
-            libstdc++6 \
-            zlib1g-dev \
-            liblzma-dev \
-            pkg-config \
-            libsqlite3-dev \
-            libbz2-dev \
-            libreadline-dev \
-            libxml2-dev \
-            libxslt1-dev \
-            tk-dev \
-            python3-setuptools \
-            python3-pip \
-            curl \
-            git
-
-      # Step 4: Install JDK 17 (to resolve sdkmanager errors)
-      - name: Install JDK 17
-        run: |
-          sudo apt-get install -y openjdk-17-jdk
-          java -version
-
-      # Step 5: Set JAVA_HOME environment variable
-      - name: Set JAVA_HOME to JDK 17
-        run: |
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-          echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
-
-      # Step 6: Install unzip and make sure it's on the path
-      - name: Ensure unzip is available
-        run: |
-          which unzip || echo "unzip not found"
-          echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
-
-      # Step 7: Set up Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -77,50 +22,25 @@ jobs:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 8: Update SDK Manager
-      - name: Update SDK Manager
-        run: |
-          sdkmanager --update
-
-      # Step 9: Force Accept SDK licenses
-      - name: Accept SDK licenses
-        run: |
-          yes | sdkmanager --licenses
-
-      # Step 10: Install SDK components with HTTP
-      - name: Install SDK components with HTTP
-        run: |
-          sdkmanager --no_https "platform-tools" "build-tools;30.0.3" "platforms;android-30"
-
-      # Step 11: Set permissions for SDK folder
-      - name: Set permissions for SDK folder
-        run: |
-          sudo chown -R $USER:$USER /usr/local/lib/android/sdk
-          sudo chmod -R 755 /usr/local/lib/android/sdk
-
-      # Step 12: Verify Android SDK installation
       - name: Verify Android SDK installation
         run: |
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 13: Install Buildozer and Cython
-      - name: Install Buildozer and Cython
+      - name: Accept SDK licenses
         run: |
-          python -m pip install cython
-          python -m pip install buildozer
+          yes | sdkmanager --licenses
 
-      # Step 14: Build APK
-      - name: Build APK
+      - name: Install specific SDK components
         run: |
-          buildozer android debug
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
-      # Step 15: Upload APK as an artifact
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: my-apk
-          path: bin/*.apk
+      - name: Update SDK Manager
+        run: |
+          sdkmanager --update
+
+      - name: Run your build commands
+        run: |
+          # Add your build commands here (e.g., gradle build)
+          echo "Build process here"
