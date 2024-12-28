@@ -46,7 +46,8 @@ jobs:
             python3-setuptools \
             python3-pip \
             curl \
-            git
+            git \
+            python3-distutils
 
       # Step 4: Install JDK 17 (to resolve sdkmanager errors)
       - name: Install JDK 17
@@ -99,12 +100,11 @@ jobs:
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 12: Install Buildozer, Cython, and distutils
-      - name: Install Buildozer, Cython, and distutils
+      # Step 12: Install Buildozer and ensure setuptools is updated
+      - name: Install Buildozer and ensure setuptools is updated
         run: |
-          python -m pip install cython
-          python -m pip install buildozer
-          sudo apt-get install -y python3-distutils
+          python -m pip install --upgrade pip
+          python -m pip install cython buildozer setuptools
 
       # Step 13: Build APK
       - name: Build APK
