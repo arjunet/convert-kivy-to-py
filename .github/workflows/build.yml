@@ -14,71 +14,102 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      # Step 2: Install required utilities (including unzip)
-      - name: Install required utilities
+      # Step 2: Set up Python 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      # Step 3: Install required dependencies
+      - name: Install required dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y unzip
-          echo "/usr/bin" >> $GITHUB_PATH  # Ensure unzip is in the PATH
+          sudo apt-get install -y \
+            build-essential \
+            libssl-dev \
+            libffi-dev \
+            python3-dev \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            libncurses5-dev \
+            libstdc++6 \
+            zlib1g-dev \
+            liblzma-dev \
+            pkg-config \
+            libsqlite3-dev \
+            libbz2-dev \
+            libreadline-dev \
+            libxml2-dev \
+            libxslt1-dev \
+            tk-dev \
+            python3-setuptools \
+            python3-pip \
+            curl \
+            git
 
-      # Step 3: Install JDK 17
+      # Step 4: Install JDK 17 (to resolve sdkmanager errors)
       - name: Install JDK 17
         run: |
           sudo apt-get install -y openjdk-17-jdk
           java -version
 
-      # Step 4: Set JAVA_HOME environment variable
-      - name: Set JAVA_HOME
+      # Step 5: Set JAVA_HOME environment variable
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-          echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
+          echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
 
-      # Step 5: Set up Android SDK (updated package names)
+      # Step 6: Ensure unzip is available
+      - name: Ensure unzip is available
+        run: |
+          which unzip || echo "unzip not found"
+          echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
+
+      # Step 7: Set up Android SDK manually
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
-          packages: platform-tools, build-tools;30.0.3, platforms;android-30
         env:
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-          PATH: $JAVA_HOME/bin:$PATH
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 6: Set up Python 3.12
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-
-      # Step 7: Install Buildozer and dependencies
-      - name: Install Buildozer and dependencies
+      # Step 8: Install Android SDK components
+      - name: Install Android SDK components
         run: |
-          sudo apt-get install -y \
-            python3-pip \
-            python3-dev \
-            build-essential \
-            libssl-dev \
-            libffi-dev \
-            libncurses5-dev \
-            libsqlite3-dev \
-            libreadline-dev \
-            libbz2-dev \
-            liblzma-dev \
-            zlib1g-dev \
-            libxml2-dev \
-            libxslt1-dev \
-            tk-dev
-          python -m pip install --upgrade pip
-          python -m pip install cython buildozer
+          sdkmanager --update
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "aidl"
 
-      # Step 8: Build APK
+      # Step 9: Force Accept SDK licenses
+      - name: Accept SDK licenses
+        run: |
+          yes | sdkmanager --licenses
+
+      # Step 10: Set permissions for SDK folder
+      - name: Set permissions for SDK folder
+        run: |
+          sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+          sudo chmod -R 755 /usr/local/lib/android/sdk
+
+      # Step 11: Verify Android SDK installation
+      - name: Verify Android SDK installation
+        run: |
+          echo "Listing installed SDK components"
+          sdkmanager --list
+
+      # Step 12: Install Buildozer and Cython
+      - name: Install Buildozer and Cython
+        run: |
+          python -m pip install cython
+          python -m pip install buildozer
+
+      # Step 13: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 9: Upload APK artifact
+      # Step 14: Upload APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
