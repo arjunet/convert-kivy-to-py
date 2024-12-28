@@ -5,71 +5,60 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the code from your repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    # Set up Python environment
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      # Step 2: Set up Python
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
 
-    # Install system dependencies
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          libffi-dev \
-          libssl-dev \
-          python3-dev \
-          python3-venv \
-          python3-pip \
-          git \
-          zip \
-          unzip \
-          openjdk-11-jdk
+      # Step 3: Install Buildozer and Dependencies
+      - name: Install Buildozer and Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3 python3-pip python3-venv build-essential git zlib1g-dev libncurses5-dev libgdbm-dev \
+                              libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev openjdk-11-jdk
+          pip install --upgrade pip
+          pip install buildozer
 
-    # Install Buildozer
-    - name: Install Buildozer
-      run: |
-        pip install --upgrade pip
-        pip install buildozer
+      # Step 4: Install Android SDK
+      - name: Install Android SDK
+        run: |
+          mkdir -p ~/.buildozer/android/platform
+          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d ~/.buildozer/android/platform/
+          mkdir -p ~/.buildozer/android/platform/cmdline-tools/latest
+          mv ~/.buildozer/android/platform/cmdline-tools/* ~/.buildozer/android/platform/cmdline-tools/latest
+          yes | ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
+          ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-31" \
+            "build-tools;31.0.0" \
+            "ndk;21.3.6528147"
+        env:
+          ANDROID_HOME: ~/.buildozer/android/platform
+          PATH: $PATH:~/.buildozer/android/platform/cmdline-tools/latest/bin:~/.buildozer/android/platform/tools
 
-    # Set up Android SDK and NDK
-    - name: Install Android SDK
-      run: |
-        mkdir -p ~/.buildozer/android/platform
-        curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o cmdline-tools.zip
-        unzip -q cmdline-tools.zip -d ~/.buildozer/android/platform/
-        mv ~/.buildozer/android/platform/cmdline-tools ~/.buildozer/android/platform/tools
-        yes | ~/.buildozer/android/platform/tools/bin/sdkmanager --licenses
-        ~/.buildozer/android/platform/tools/bin/sdkmanager \
-          "platform-tools" \
-          "platforms;android-31" \
-          "build-tools;31.0.0" \
-          "ndk;21.3.6528147"
+      # Step 5: Build the APK
+      - name: Build APK
+        run: |
+          buildozer android debug
+        env:
+          ANDROID_HOME: ~/.buildozer/android/platform
+          PATH: $PATH:~/.buildozer/android/platform/cmdline-tools/latest/bin:~/.buildozer/android/platform/tools
 
-    # Build the APK
-    - name: Build the APK
-      run: |
-        buildozer android debug
-      env:
-        ANDROIDSDK: ~/.buildozer/android/platform/tools/bin
-        ANDROIDNDK: ~/.buildozer/android/platform/android-ndk-r21e
-
-    # Upload the APK to GitHub Artifacts
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: MyApp
-        path: bin/*.apk
+      # Step 6: Upload APK as an Artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: MyApp-debug.apk
+          path: bin/*.apk
