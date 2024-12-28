@@ -54,7 +54,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install buildozer
 
-      # Step 4: Install Android SDK, NDK, and Build Tools
+      # Step 4: Install Android SDK and NDK
       - name: Install Android SDK and NDK
         run: |
           mkdir -p ~/.buildozer/android/platform
@@ -74,9 +74,9 @@ jobs:
         run: |
           buildozer android debug
 
-      # Step 6: Upload APK as artifact
+      # Step 6: Upload APK as artifact (updated to v3)
       - name: Upload APK as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: android-apk
           path: bin/*.apk
