@@ -14,23 +14,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      # Step 2: Install required utilities (including unzip)
+      # Step 2: Install required utilities
       - name: Install required utilities
         run: |
           sudo apt-get update
           sudo apt-get install -y unzip
 
-      # Step 3: Set up Python 3.12
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-
-      # Step 4: Install JDK 17
+      # Step 3: Install JDK 17
       - name: Install JDK 17
         run: |
           sudo apt-get install -y openjdk-17-jdk
           java -version
+
+      # Step 4: Set JAVA_HOME environment variable
+      - name: Set JAVA_HOME
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
 
       # Step 5: Set up Android SDK
       - name: Set up Android SDK
@@ -43,10 +43,15 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 6: Install Buildozer and dependencies
+      # Step 6: Set up Python 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      # Step 7: Install Buildozer and dependencies
       - name: Install Buildozer and dependencies
         run: |
-          sudo apt-get update
           sudo apt-get install -y \
             python3-pip \
             python3-dev \
@@ -65,12 +70,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install cython buildozer
 
-      # Step 7: Build APK
+      # Step 8: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 8: Upload APK artifact
+      # Step 9: Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
