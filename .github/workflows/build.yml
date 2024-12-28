@@ -60,7 +60,7 @@ jobs:
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
 
-      # Step 6: Ensure unzip is available
+      # Step 6: Install unzip and make sure it's on the path
       - name: Ensure unzip is available
         run: |
           which unzip || echo "unzip not found"
@@ -75,19 +75,18 @@ jobs:
           log-accepted-android-sdk-licenses: true
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-          PATH: $PATH:/usr/local/lib/android/sdk/cmdline-tools/latest/bin
 
-      # Step 8: Install Android SDK components
+      # Step 8: Install Android SDK components directly using sdkmanager
       - name: Install Android SDK components
         run: |
           sdkmanager --update
-          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "cmdline-tools;latest"
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
-      # Step 9: Ensure aidl is in the PATH
-      - name: Ensure aidl is available in PATH
+      # Step 9: Ensure aidl is installed
+      - name: Install aidl
         run: |
-          which aidl || echo "aidl not found"
-          echo "PATH=$PATH:/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+          sdkmanager "build-tools;30.0.3" "platforms;android-30" "cmdline-tools;latest"
+          echo "aidl installation step completed"
 
       # Step 10: Force Accept SDK licenses
       - name: Accept SDK licenses
