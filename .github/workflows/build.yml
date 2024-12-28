@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: 3.12
 
-      # Step 3: Install required dependencies
+      # Step 3: Install required dependencies, including unzip
       - name: Install required dependencies
         run: |
           sudo apt-get update
