@@ -19,6 +19,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y unzip
+          echo "/usr/bin" >> $GITHUB_PATH  # Ensure unzip is in the PATH
 
       # Step 3: Install JDK 17
       - name: Install JDK 17
