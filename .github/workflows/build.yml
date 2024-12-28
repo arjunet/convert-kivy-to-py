@@ -1,29 +1,26 @@
-name: Build Android APK
+name: Build APK with Buildozer
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # Adjust this to your desired branch (e.g., 'main' or 'master')
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
+      # Step 1: Check out the repository
+      - name: Check out repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up Python
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
+      # Step 2: Set up Python 3.12 (or the Python version you need)
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.12
 
-      # Step 3: Install dependencies
+      # Step 3: Install Buildozer dependencies
       - name: Install Buildozer dependencies
         run: |
           sudo apt-get update
@@ -31,8 +28,7 @@ jobs:
             build-essential \
             libssl-dev \
             libffi-dev \
-            python-dev \
-            python3-dev \
+            python3-dev \  # Replaced python-dev with python3-dev
             zip \
             unzip \
             openjdk-8-jdk \
@@ -41,42 +37,33 @@ jobs:
             zlib1g-dev \
             liblzma-dev \
             pkg-config \
-            libssl-dev \
             libsqlite3-dev \
             libbz2-dev \
             libreadline-dev \
             libxml2-dev \
             libxslt1-dev \
-            liblzma-dev \
             tk-dev
           
           # Install pip and Buildozer
           python -m pip install --upgrade pip
           pip install buildozer
 
-      # Step 4: Install Android SDK and NDK
-      - name: Install Android SDK and NDK
+      # Step 4: Set up Buildozer configuration
+      - name: Set up Buildozer config
         run: |
-          mkdir -p ~/.buildozer/android/platform
-          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o cmdline-tools.zip
-          unzip -q cmdline-tools.zip -d ~/.buildozer/android/platform/
-          mkdir -p ~/.buildozer/android/platform/cmdline-tools/latest
-          mv ~/.buildozer/android/platform/cmdline-tools/* ~/.buildozer/android/platform/cmdline-tools/latest/
-          yes | ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
-          ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-31" \
-            "build-tools;31.0.0" \
-            "ndk;21.3.6528147"
+          # Replace this with your project setup or any necessary commands
+          # You can copy your Buildozer spec file (buildozer.spec) into your repo for this step to work
+          cp /path/to/your/buildozer.spec ./  # Adjust this path if needed
 
       # Step 5: Build APK using Buildozer
       - name: Build APK
         run: |
-          buildozer android debug
+          buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 6: Upload APK as artifact (updated to v3)
-      - name: Upload APK as artifact
+      # Step 6: Upload the generated APK as an artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
-          name: android-apk
-          path: bin/*.apk
+          name: my-apk
+          path: bin/*.apk  # This will upload any APK found in the bin folder
+          
