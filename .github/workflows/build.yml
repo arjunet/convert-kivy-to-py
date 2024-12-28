@@ -47,7 +47,7 @@ jobs:
             python3-pip \
             curl \
             git \
-            python3-distutils  # Install distutils
+            python3-distutils  # Install distutils for Python 3.12 explicitly
 
           # Install pip and Buildozer
           python -m pip install --upgrade pip
