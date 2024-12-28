@@ -20,8 +20,8 @@ jobs:
         with:
           python-version: 3.12
 
-      # Step 3: Install Buildozer and Android SDK dependencies
-      - name: Install Buildozer and Android SDK dependencies
+      # Step 3: Install required dependencies
+      - name: Install required dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -48,42 +48,24 @@ jobs:
             curl \
             git
 
-          # Install the Android SDK Command Line Tools
-          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-          unzip commandlinetools.zip -d $HOME/android-sdk
-          rm commandlinetools.zip
+      # Step 4: Set up Android SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools,platforms;android-30,build-tools;30.0.3'
 
-          # Create the 'latest' directory if it doesn't exist
-          mkdir -p $HOME/android-sdk/cmdline-tools/latest
-
-          # Move extracted files into the 'latest' directory
-          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
-
-          # Set environment variables
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-          
-          # Accept SDK licenses
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "tools"
-
-          # Install Cython
+      # Step 5: Install Cython and Buildozer
+      - name: Install Buildozer and Cython
+        run: |
           python -m pip install cython  # Install Cython, which is missing
+          python -m pip install buildozer  # Install Buildozer
 
-          # Install Buildozer
-          python -m pip install buildozer
-          
-          # Check the installed versions
-          python --version
-          buildozer --version
-          sdkmanager --version
-
-      # Step 4: Build APK using Buildozer
+      # Step 6: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 5: Upload the generated APK as an artifact
+      # Step 7: Upload the generated APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
