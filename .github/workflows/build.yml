@@ -49,25 +49,32 @@ jobs:
             git \
             python3-distutils  # Install distutils
 
-      # Step 4: Install JDK 17 (to resolve sdkmanager errors)
+      # Step 4: Set distutils path
+      - name: Add distutils to PATH
+        run: |
+          export DISTUTILS_PATH=$(python3 -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())")
+          echo "Adding distutils to PATH"
+          echo "PATH=$DISTUTILS_PATH:$PATH" >> $GITHUB_ENV
+
+      # Step 5: Install JDK 17 (to resolve sdkmanager errors)
       - name: Install JDK 17
         run: |
           sudo apt-get install -y openjdk-17-jdk
           java -version
 
-      # Step 5: Set JAVA_HOME environment variable
+      # Step 6: Set JAVA_HOME environment variable
       - name: Set JAVA_HOME to JDK 17
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
 
-      # Step 6: Install unzip and make sure it's on the path
+      # Step 7: Install unzip and make sure it's on the path
       - name: Ensure unzip is available
         run: |
           which unzip || echo "unzip not found"
           echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
 
-      # Step 7: Set up Android SDK manually
+      # Step 8: Set up Android SDK manually
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -77,17 +84,11 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 8: Install Android SDK components directly using sdkmanager
+      # Step 9: Install Android SDK components directly using sdkmanager
       - name: Install Android SDK components
         run: |
           sdkmanager --update
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
-
-      # Step 9: Ensure aidl is installed
-      - name: Install aidl
-        run: |
-          sdkmanager "build-tools;30.0.3" "platforms;android-30" "cmdline-tools;latest"
-          echo "aidl installation step completed"
 
       # Step 10: Force Accept SDK licenses
       - name: Accept SDK licenses
