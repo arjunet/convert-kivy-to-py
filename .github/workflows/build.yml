@@ -28,7 +28,7 @@ jobs:
         curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o cmdline-tools.zip
         unzip -q cmdline-tools.zip -d ~/.buildozer/android/platform/
         mkdir -p ~/.buildozer/android/platform/cmdline-tools/latest
-        # Check if cmdline-tools folder has been extracted, and only move contents if needed
+        # Move all contents of cmdline-tools into latest/ folder, without moving the 'latest' folder itself
         mv ~/.buildozer/android/platform/cmdline-tools/* ~/.buildozer/android/platform/cmdline-tools/latest/
         yes | ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
         ~/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager \
