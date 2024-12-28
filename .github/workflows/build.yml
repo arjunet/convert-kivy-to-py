@@ -54,7 +54,13 @@ jobs:
           sudo apt-get install -y openjdk-17-jdk
           java -version
 
-      # Step 5: Set up Android SDK
+      # Step 5: Set JAVA_HOME environment variable
+      - name: Set JAVA_HOME to JDK 17
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
+
+      # Step 6: Set up Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -63,18 +69,18 @@ jobs:
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
 
-      # Step 6: Install Cython and Buildozer
+      # Step 7: Install Cython and Buildozer
       - name: Install Buildozer and Cython
         run: |
           python -m pip install cython  # Install Cython, which is missing
           python -m pip install buildozer  # Install Buildozer
 
-      # Step 7: Build APK using Buildozer
+      # Step 8: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 8: Upload the generated APK as an artifact
+      # Step 9: Upload the generated APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
