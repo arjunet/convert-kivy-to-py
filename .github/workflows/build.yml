@@ -55,6 +55,7 @@ jobs:
           java -version
 
       # Step 5: Set JAVA_HOME environment variable
+      - name: Set JAVA_HOME to JDK 17
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
@@ -81,18 +82,15 @@ jobs:
 
       # Step 8: Update SDK Manager
       - name: Update SDK Manager
-        run: |
-          sdkmanager --update
+        run: sdkmanager --update
 
       # Step 9: Force Accept SDK licenses
       - name: Accept SDK licenses
-        run: |
-          yes | sdkmanager --licenses
+        run: yes | sdkmanager --licenses
 
       # Step 10: Install SDK components with HTTP
       - name: Install SDK components with HTTP
-        run: |
-          sdkmanager --no_https "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+        run: sdkmanager --no_https "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
       # Step 11: Set permissions for SDK folder
       - name: Set permissions for SDK folder
@@ -114,8 +112,7 @@ jobs:
 
       # Step 14: Build APK
       - name: Build APK
-        run: |
-          buildozer android debug
+        run: buildozer android debug
 
       # Step 15: Upload APK as an artifact
       - name: Upload APK artifact
