@@ -46,7 +46,8 @@ jobs:
             python3-setuptools \
             python3-pip \
             curl \
-            git
+            git \
+            python3-distutils  # Install distutils
 
       # Step 4: Install JDK 17 (to resolve sdkmanager errors)
       - name: Install JDK 17
