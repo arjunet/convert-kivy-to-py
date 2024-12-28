@@ -49,24 +49,21 @@ jobs:
             git \
             python3-distutils
 
-      # Step 4: Install JDK 17 (to resolve sdkmanager errors)
-      - name: Install JDK 17
+      # Step 4: Install JDK 17 and set JAVA_HOME
+      - name: Install JDK 17 and set JAVA_HOME
         run: |
           sudo apt-get install -y openjdk-17-jdk
-          java -version
-
-      # Step 5: Set JAVA_HOME environment variable
-        run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
+          java -version
 
-      # Step 6: Install unzip and make sure it's on the path
+      # Step 5: Ensure unzip is available
       - name: Ensure unzip is available
         run: |
           which unzip || echo "unzip not found"
           echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
 
-      # Step 7: Set up Android SDK manually
+      # Step 6: Set up Android SDK manually
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -76,46 +73,41 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 8: Install Android SDK components directly using sdkmanager
-      - name: Install Android SDK components
+      # Step 7: Install Android SDK components and NDK (includes aidl)
+      - name: Install Android SDK components and NDK
         run: |
           sdkmanager --update
-          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "build-tools;29.0.3"
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "ndk;21.3.6528147"
 
-      # Step 9: Install Android NDK (includes aidl)
-      - name: Install Android NDK (includes aidl)
-        run: |
-          sdkmanager "ndk;21.3.6528147" # Install NDK version that includes aidl tool
-
-      # Step 10: Force Accept SDK licenses
+      # Step 8: Accept SDK licenses
       - name: Accept SDK licenses
         run: |
           yes | sdkmanager --licenses
 
-      # Step 11: Set permissions for SDK folder
+      # Step 9: Set permissions for SDK folder
       - name: Set permissions for SDK folder
         run: |
           sudo chown -R $USER:$USER /usr/local/lib/android/sdk
           sudo chmod -R 755 /usr/local/lib/android/sdk
 
-      # Step 12: Verify Android SDK installation
+      # Step 10: Verify Android SDK installation
       - name: Verify Android SDK installation
         run: |
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 13: Install Buildozer and ensure setuptools is updated
+      # Step 11: Install Buildozer and ensure setuptools is updated
       - name: Install Buildozer and ensure setuptools is updated
         run: |
           python -m pip install --upgrade pip
           python -m pip install cython buildozer setuptools
 
-      # Step 14: Build APK
+      # Step 12: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 15: Upload APK as an artifact
+      # Step 13: Upload APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
