@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: 3.12
 
-      # Step 3: Install Buildozer dependencies and Android SDK tools
+      # Step 3: Install Buildozer and Android SDK dependencies
       - name: Install Buildozer and Android SDK dependencies
         run: |
           sudo apt-get update
@@ -46,12 +46,7 @@ jobs:
             python3-setuptools \
             python3-pip \
             curl \
-            git \
-            lib32stdc++6 \
-            lib32z1 \
-            lib32ncurses5 \
-            lib32bz2-1.0 \
-            lib32lzma-dev
+            git
 
           # Install the Android SDK Command Line Tools
           curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
