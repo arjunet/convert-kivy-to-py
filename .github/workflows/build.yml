@@ -39,9 +39,11 @@ jobs:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
-          packages: tools platform-tools
+          packages: tools, platform-tools
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+          PATH: $JAVA_HOME/bin:$PATH
 
       # Step 6: Set up Python 3.12
       - name: Set up Python 3.12
@@ -68,7 +70,7 @@ jobs:
             libxslt1-dev \
             tk-dev
           python -m pip install --upgrade pip
-          python -m pip install cython buildozer
+          python -m pip install cython buildozer setuptools
 
       # Step 8: Build APK
       - name: Build APK
