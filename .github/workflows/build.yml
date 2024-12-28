@@ -55,7 +55,6 @@ jobs:
           java -version
 
       # Step 5: Set JAVA_HOME environment variable
-      - name: Set JAVA_HOME to JDK 17
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
