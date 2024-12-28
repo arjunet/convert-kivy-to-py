@@ -47,7 +47,8 @@ jobs:
             python3-pip \
             curl \
             git \
-            python3-distutils
+            python3-distutils \
+            python3-aidl  # Add this line to install python3-aidl
 
       # Step 4: Install JDK 17 (to resolve sdkmanager errors)
       - name: Install JDK 17
@@ -83,40 +84,35 @@ jobs:
           sdkmanager --update
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "build-tools;29.0.3"
 
-      # Step 9: Install AIDL
-      - name: Install AIDL
-        run: |
-          sdkmanager "platform-tools"
-
-      # Step 10: Force Accept SDK licenses
+      # Step 9: Force Accept SDK licenses
       - name: Accept SDK licenses
         run: |
           yes | sdkmanager --licenses
 
-      # Step 11: Set permissions for SDK folder
+      # Step 10: Set permissions for SDK folder
       - name: Set permissions for SDK folder
         run: |
           sudo chown -R $USER:$USER /usr/local/lib/android/sdk
           sudo chmod -R 755 /usr/local/lib/android/sdk
 
-      # Step 12: Verify Android SDK installation
+      # Step 11: Verify Android SDK installation
       - name: Verify Android SDK installation
         run: |
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 13: Install Buildozer and ensure setuptools is updated
+      # Step 12: Install Buildozer and ensure setuptools is updated
       - name: Install Buildozer and ensure setuptools is updated
         run: |
           python -m pip install --upgrade pip
           python -m pip install cython buildozer setuptools
 
-      # Step 14: Build APK
+      # Step 13: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 15: Upload APK as an artifact
+      # Step 14: Upload APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
