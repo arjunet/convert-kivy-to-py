@@ -60,7 +60,13 @@ jobs:
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
 
-      # Step 6: Set up Android SDK
+      # Step 6: Check for unzip and set PATH
+      - name: Check unzip and set PATH
+        run: |
+          which unzip || echo "unzip not found"  # Check if unzip is available
+          echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV  # Ensure /usr/bin is in the PATH
+
+      # Step 7: Set up Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -69,18 +75,18 @@ jobs:
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
 
-      # Step 7: Install Cython and Buildozer
+      # Step 8: Install Cython and Buildozer
       - name: Install Buildozer and Cython
         run: |
           python -m pip install cython  # Install Cython, which is missing
           python -m pip install buildozer  # Install Buildozer
 
-      # Step 8: Build APK using Buildozer
+      # Step 9: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 9: Upload the generated APK as an artifact
+      # Step 10: Upload the generated APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
