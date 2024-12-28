@@ -53,13 +53,11 @@ jobs:
           unzip commandlinetools.zip -d $HOME/android-sdk
           rm commandlinetools.zip
 
-          # Move extracted files to correct location
-          if [ -d "$HOME/android-sdk/cmdline-tools" ]; then
-            mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
-          else
-            mkdir -p $HOME/android-sdk/cmdline-tools/latest
-            mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
-          fi
+          # Create the 'latest' directory if it doesn't exist
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+
+          # Move extracted files into the 'latest' directory
+          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
 
           # Set environment variables
           export ANDROID_HOME=$HOME/android-sdk
