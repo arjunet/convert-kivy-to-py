@@ -48,10 +48,17 @@ jobs:
             curl \
             git \
             python3-distutils  # Install distutils for Python 3.12 explicitly
-
+          
+          # Double-checking distutils for Python 3.12 (sometimes, it doesn't install correctly)
+          sudo apt-get install -y python3-distutils-extra
+          
           # Install pip and Buildozer
           python -m pip install --upgrade pip
           pip install buildozer
+
+          # Check Python version and if distutils is available
+          python --version
+          python -c "import distutils; print(distutils.__file__)"
 
       # Step 4: Build APK using Buildozer
       - name: Build APK
