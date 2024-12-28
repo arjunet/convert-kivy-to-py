@@ -77,10 +77,10 @@ jobs:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       # Step 8: Install Android SDK components directly using sdkmanager
-      - name: Install Android SDK components (including aidl)
+      - name: Install Android SDK components
         run: |
           sdkmanager --update
-          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "cmdline-tools;latest" "ndk;23.1.7779620"
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
       # Step 9: Force Accept SDK licenses
       - name: Accept SDK licenses
@@ -99,11 +99,12 @@ jobs:
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 12: Install Buildozer and Cython
-      - name: Install Buildozer and Cython
+      # Step 12: Install Buildozer, Cython, and distutils
+      - name: Install Buildozer, Cython, and distutils
         run: |
           python -m pip install cython
           python -m pip install buildozer
+          python -m pip install setuptools
 
       # Step 13: Build APK
       - name: Build APK
