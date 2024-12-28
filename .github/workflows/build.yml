@@ -52,8 +52,14 @@ jobs:
           curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
           unzip commandlinetools.zip -d $HOME/android-sdk
           rm commandlinetools.zip
+
+          # Create the expected directory structure
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest
+
+          # Set the SDK path
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
           
           # Install the required SDK components
           yes | sdkmanager --licenses
