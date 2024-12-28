@@ -53,11 +53,13 @@ jobs:
           unzip commandlinetools.zip -d $HOME/android-sdk
           rm commandlinetools.zip
 
-          # Ensure cmdline-tools is correctly structured
+          # Ensure the directory structure is correct (avoid moving latest into itself)
           if [ ! -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
             mkdir -p $HOME/android-sdk/cmdline-tools/latest
-            mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest
           fi
+
+          # Move files into the latest directory
+          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
 
           # Set the SDK path
           export ANDROID_HOME=$HOME/android-sdk
