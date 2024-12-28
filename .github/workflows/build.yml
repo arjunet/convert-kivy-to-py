@@ -28,7 +28,7 @@ jobs:
             build-essential \
             libssl-dev \
             libffi-dev \
-            python3-dev \  # Replaced python-dev with python3-dev
+            python3-dev \
             zip \
             unzip \
             openjdk-8-jdk \
@@ -42,13 +42,17 @@ jobs:
             libreadline-dev \
             libxml2-dev \
             libxslt1-dev \
-            tk-dev
+            tk-dev \
+            python3-setuptools \
+            python3-pip \
+            curl \
+            git
           
           # Install pip and Buildozer
           python -m pip install --upgrade pip
           pip install buildozer
 
-      # Step 4: Set up Buildozer configuration
+      # Step 4: Set up Buildozer config
       - name: Set up Buildozer config
         run: |
           # Replace this with your project setup or any necessary commands
