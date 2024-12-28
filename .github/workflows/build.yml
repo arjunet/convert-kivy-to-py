@@ -48,9 +48,12 @@ jobs:
             curl \
             git 
 
-          # Install setuptools, which includes distutils functionality for Python 3.12
+          # Install setuptools (includes distutils) and pip packages
           python -m pip install --upgrade pip
           python -m pip install setuptools  # Ensure setuptools is installed (which now includes distutils)
+
+          # Install Cython
+          python -m pip install cython  # Install Cython, which is missing
 
           # Check the installed version of setuptools and verify if distutils is available
           python -c "import setuptools; print(setuptools.__file__)"
