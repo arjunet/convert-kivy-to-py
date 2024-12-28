@@ -14,7 +14,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      # Step 2: Install required utilities
+      # Step 2: Install required utilities (including unzip)
       - name: Install required utilities
         run: |
           sudo apt-get update
@@ -39,7 +39,7 @@ jobs:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
-          packages: tools, platform-tools
+          packages: tools, platform-tools, build-tools;30.0.3,platforms;android-30
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
