@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: 3.12
 
-      # Step 3: Install Buildozer dependencies, including distutils
+      # Step 3: Install Buildozer dependencies
       - name: Install Buildozer dependencies
         run: |
           sudo apt-get update
@@ -49,23 +49,27 @@ jobs:
             git \
             python3-distutils  # Install distutils for Python 3.12 explicitly
           
-          # Double-checking distutils for Python 3.12 (sometimes, it doesn't install correctly)
-          sudo apt-get install -y python3-distutils-extra
-          
-          # Install pip and Buildozer
+          # Install setuptools and force distutils install from sources
           python -m pip install --upgrade pip
-          pip install buildozer
+          python -m pip install setuptools
+          python -m pip install --force-reinstall distutils  # Force reinstall distutils
 
-          # Check Python version and if distutils is available
+          # Check if distutils is available
           python --version
           python -c "import distutils; print(distutils.__file__)"
 
-      # Step 4: Build APK using Buildozer
+      # Step 4: Install Buildozer
+      - name: Install Buildozer
+        run: |
+          pip install buildozer
+          buildozer --version  # Check if Buildozer was installed successfully
+
+      # Step 5: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 5: Upload the generated APK as an artifact
+      # Step 6: Upload the generated APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
