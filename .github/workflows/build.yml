@@ -74,6 +74,8 @@ jobs:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       # Step 8: Install Cython and Buildozer
       - name: Install Buildozer and Cython
@@ -81,12 +83,18 @@ jobs:
           python -m pip install cython  # Install Cython, which is missing
           python -m pip install buildozer  # Install Buildozer
 
-      # Step 9: Build APK using Buildozer
+      # Step 9: Retry SDK installation if needed (manual attempt)
+      - name: Retry SDK installation manually
+        run: |
+          sdkmanager --update || echo "SDK manager update failed"
+          sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" || echo "Manual SDK install failed"
+      
+      # Step 10: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 10: Upload the generated APK as an artifact
+      # Step 11: Upload the generated APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
