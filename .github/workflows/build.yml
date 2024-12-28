@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK with Buildozer
 
 on:
   push:
@@ -8,55 +8,117 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Step 1: Check out the repository
+      - name: Check out repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.12
+      # Step 2: Set up Python 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
 
-    - name: Install required dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          openjdk-17-jdk \
-          ant \
-          git \
-          python3-pip \
-          python3-setuptools \
-          python3-dev \
-          libssl-dev \
-          libffi-dev \
-          build-essential \
-          zip \
-          unzip \
-          sdkmanager \
-          wget
-        # Install Android SDK command-line tools
-        mkdir -p $HOME/Android/Sdk
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O /tmp/cmdline-tools.zip
-        unzip -q /tmp/cmdline-tools.zip -d $HOME/Android/Sdk
-        rm /tmp/cmdline-tools.zip
-        echo "export ANDROID_HOME=$HOME/Android/Sdk" >> ~/.bashrc
-        echo "export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/tools/bin:$PATH" >> ~/.bashrc
-        source ~/.bashrc
-        sdkmanager --licenses
-        sdkmanager "build-tools;29.0.3" "platform-tools"
-        # Install AIDL (if necessary)
-        sdkmanager "platform-tools"
+      # Step 3: Install required dependencies
+      - name: Install required dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libssl-dev \
+            libffi-dev \
+            python3-dev \
+            zip \
+            unzip \
+            openjdk-8-jdk \
+            libncurses5-dev \
+            libstdc++6 \
+            zlib1g-dev \
+            liblzma-dev \
+            pkg-config \
+            libsqlite3-dev \
+            libbz2-dev \
+            libreadline-dev \
+            libxml2-dev \
+            libxslt1-dev \
+            tk-dev \
+            python3-setuptools \
+            python3-pip \
+            curl \
+            git \
+            python3-distutils
 
-    - name: Install Buildozer
-      run: |
-        python -m pip install --upgrade pip
-        pip install buildozer
+      # Step 4: Install JDK 17 (to resolve sdkmanager errors)
+      - name: Install JDK 17
+        run: |
+          sudo apt-get install -y openjdk-17-jdk
+          java -version
 
-    - name: Install AIDL
-      run: |
-        sdkmanager "build-tools;29.0.3" "platform-tools"
-        
-    - name: Build APK using Buildozer
-      run: |
-        buildozer android debug
+      # Step 5: Set JAVA_HOME environment variable
+      - name: Set JAVA_HOME to JDK 17
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
+
+      # Step 6: Install unzip and make sure it's on the path
+      - name: Ensure unzip is available
+        run: |
+          which unzip || echo "unzip not found"
+          echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
+
+      # Step 7: Set up Android SDK manually
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 12266719
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: true
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
+      # Step 8: Install Android SDK components directly using sdkmanager
+      - name: Install Android SDK components
+        run: |
+          sdkmanager --update
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "build-tools;29.0.3"
+
+      # Step 9: Install AIDL
+      - name: Install AIDL
+        run: |
+          sdkmanager "platform-tools"
+
+      # Step 10: Force Accept SDK licenses
+      - name: Accept SDK licenses
+        run: |
+          yes | sdkmanager --licenses
+
+      # Step 11: Set permissions for SDK folder
+      - name: Set permissions for SDK folder
+        run: |
+          sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+          sudo chmod -R 755 /usr/local/lib/android/sdk
+
+      # Step 12: Verify Android SDK installation
+      - name: Verify Android SDK installation
+        run: |
+          echo "Listing installed SDK components"
+          sdkmanager --list
+
+      # Step 13: Install Buildozer and ensure setuptools is updated
+      - name: Install Buildozer and ensure setuptools is updated
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install cython buildozer setuptools
+
+      # Step 14: Build APK
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      # Step 15: Upload APK as an artifact
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-apk
+          path: bin/*.apk
