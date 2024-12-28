@@ -54,18 +54,15 @@ jobs:
           sudo apt-get install -y openjdk-17-jdk
           java -version
 
-      # Step 5: Set JAVA_HOME environment variable
+      # Step 5: Set JAVA_HOME environment variable and ensure unzip is available
+      - name: Set JAVA_HOME to JDK 17 and ensure unzip is available
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
-
-      # Step 6: Ensure unzip is available
-      - name: Ensure unzip is available
-        run: |
           which unzip || echo "unzip not found"
           echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
 
-      # Step 7: Set up Android SDK manually
+      # Step 6: Set up Android SDK manually
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -75,41 +72,41 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 8: Install Android SDK components
+      # Step 7: Install Android SDK components
       - name: Install Android SDK components
         run: |
           sdkmanager --update
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "aidl"
 
-      # Step 9: Force Accept SDK licenses
+      # Step 8: Force Accept SDK licenses
       - name: Accept SDK licenses
         run: |
           yes | sdkmanager --licenses
 
-      # Step 10: Set permissions for SDK folder
+      # Step 9: Set permissions for SDK folder
       - name: Set permissions for SDK folder
         run: |
           sudo chown -R $USER:$USER /usr/local/lib/android/sdk
           sudo chmod -R 755 /usr/local/lib/android/sdk
 
-      # Step 11: Verify Android SDK installation
+      # Step 10: Verify Android SDK installation
       - name: Verify Android SDK installation
         run: |
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 12: Install Buildozer and Cython
+      # Step 11: Install Buildozer and Cython
       - name: Install Buildozer and Cython
         run: |
           python -m pip install cython
           python -m pip install buildozer
 
-      # Step 13: Build APK
+      # Step 12: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 14: Upload APK as an artifact
+      # Step 13: Upload APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
