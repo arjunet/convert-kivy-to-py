@@ -55,9 +55,8 @@ jobs:
       # Step 4: Set up Buildozer config
       - name: Set up Buildozer config
         run: |
-          # Replace this with your project setup or any necessary commands
-          # You can copy your Buildozer spec file (buildozer.spec) into your repo for this step to work
-          cp /path/to/your/buildozer.spec ./  # Adjust this path if needed
+          # Copy the buildozer.spec file from the root of the repository to the current directory
+          cp ./buildozer.spec ./
 
       # Step 5: Build APK using Buildozer
       - name: Build APK
@@ -70,4 +69,3 @@ jobs:
         with:
           name: my-apk
           path: bin/*.apk  # This will upload any APK found in the bin folder
-          
