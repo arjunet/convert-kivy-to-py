@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       # Step 1: Check out the repository
       - name: Check out repository
@@ -48,24 +48,33 @@ jobs:
             curl \
             git
 
-      # Step 4: Set up Android SDK
+      # Step 4: Install JDK 17 (to resolve the SDK manager error)
+      - name: Install JDK 17
+        run: |
+          sudo apt-get install -y openjdk-17-jdk
+          java -version
+
+      # Step 5: Set up Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools,platforms;android-30,build-tools;30.0.3'
+          cmdline-tools-version: 12266719
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: true
 
-      # Step 5: Install Cython and Buildozer
+      # Step 6: Install Cython and Buildozer
       - name: Install Buildozer and Cython
         run: |
           python -m pip install cython  # Install Cython, which is missing
           python -m pip install buildozer  # Install Buildozer
 
-      # Step 6: Build APK using Buildozer
+      # Step 7: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer android debug  # Run buildozer to build the APK (adjust flags if needed)
 
-      # Step 7: Upload the generated APK as an artifact
+      # Step 8: Upload the generated APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
