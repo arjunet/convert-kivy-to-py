@@ -47,7 +47,7 @@ jobs:
             python3-pip \
             curl \
             git \
-            python3-distutils  # Install distutils
+            python3-distutils  # Install distutils explicitly
 
       # Step 4: Set distutils path
       - name: Add distutils to PATH
