@@ -49,32 +49,43 @@ jobs:
             git \
             python3-distutils  # Install distutils explicitly
 
-      # Step 4: Set distutils path
+      # Step 4: Install distutils manually from source if it's missing
+      - name: Ensure distutils is available
+        run: |
+          if ! python3 -c "import distutils" &>/dev/null; then
+            echo "distutils not found, installing manually"
+            curl -LO https://github.com/python/cpython/archive/refs/tags/v3.12.8.tar.gz
+            tar -xvf v3.12.8.tar.gz
+            cd cpython-3.12.8/Lib
+            sudo python3 setup.py install
+          fi
+
+      # Step 5: Set distutils path (add distutils to PATH)
       - name: Add distutils to PATH
         run: |
           export DISTUTILS_PATH=$(python3 -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())")
           echo "Adding distutils to PATH"
           echo "PATH=$DISTUTILS_PATH:$PATH" >> $GITHUB_ENV
 
-      # Step 5: Install JDK 17 (to resolve sdkmanager errors)
+      # Step 6: Install JDK 17 (to resolve sdkmanager errors)
       - name: Install JDK 17
         run: |
           sudo apt-get install -y openjdk-17-jdk
           java -version
 
-      # Step 6: Set JAVA_HOME environment variable
+      # Step 7: Set JAVA_HOME environment variable
       - name: Set JAVA_HOME to JDK 17
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
           echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
 
-      # Step 7: Install unzip and make sure it's on the path
+      # Step 8: Install unzip and make sure it's on the path
       - name: Ensure unzip is available
         run: |
           which unzip || echo "unzip not found"
           echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
 
-      # Step 8: Set up Android SDK manually
+      # Step 9: Set up Android SDK manually
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -84,41 +95,41 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # Step 9: Install Android SDK components directly using sdkmanager
+      # Step 10: Install Android SDK components directly using sdkmanager
       - name: Install Android SDK components
         run: |
           sdkmanager --update
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
-      # Step 10: Force Accept SDK licenses
+      # Step 11: Force Accept SDK licenses
       - name: Accept SDK licenses
         run: |
           yes | sdkmanager --licenses
 
-      # Step 11: Set permissions for SDK folder
+      # Step 12: Set permissions for SDK folder
       - name: Set permissions for SDK folder
         run: |
           sudo chown -R $USER:$USER /usr/local/lib/android/sdk
           sudo chmod -R 755 /usr/local/lib/android/sdk
 
-      # Step 12: Verify Android SDK installation
+      # Step 13: Verify Android SDK installation
       - name: Verify Android SDK installation
         run: |
           echo "Listing installed SDK components"
           sdkmanager --list
 
-      # Step 13: Install Buildozer and Cython
+      # Step 14: Install Buildozer and Cython
       - name: Install Buildozer and Cython
         run: |
           python -m pip install cython
           python -m pip install buildozer
 
-      # Step 14: Build APK
+      # Step 15: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 15: Upload APK as an artifact
+      # Step 16: Upload APK as an artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
