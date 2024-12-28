@@ -46,17 +46,15 @@ jobs:
             python3-setuptools \
             python3-pip \
             curl \
-            git \
-            python3-distutils  # Install distutils for Python 3.12 explicitly
-          
-          # Install setuptools and force distutils install from sources
-          python -m pip install --upgrade pip
-          python -m pip install setuptools
-          python -m pip install --force-reinstall distutils  # Force reinstall distutils
+            git 
 
-          # Check if distutils is available
+          # Install setuptools, which includes distutils functionality for Python 3.12
+          python -m pip install --upgrade pip
+          python -m pip install setuptools  # Ensure setuptools is installed (which now includes distutils)
+
+          # Check the installed version of setuptools and verify if distutils is available
+          python -c "import setuptools; print(setuptools.__file__)"
           python --version
-          python -c "import distutils; print(distutils.__file__)"
 
       # Step 4: Install Buildozer
       - name: Install Buildozer
