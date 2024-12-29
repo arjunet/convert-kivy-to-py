@@ -56,11 +56,13 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Clean Buildozer cache
-        run: buildozer android clean
+        run: |
+          rm -rf .buildozer
+          buildozer android clean
 
       - name: Build APK
         run: |
-          buildozer android debug
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
