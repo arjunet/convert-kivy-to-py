@@ -35,6 +35,20 @@ jobs:
             libavcodec-dev \
             zlib1g-dev
 
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Install Android SDK tools
+        run: |
+          sdkmanager "platform-tools" "platforms;android-28" "build-tools;28.0.3"
+
+      - name: Set Android SDK path
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Clean Buildozer cache
+        run: buildozer android clean
+
       - name: Build APK
         run: |
           buildozer android debug
