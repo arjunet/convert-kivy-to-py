@@ -1,126 +1,67 @@
-name: Build APK with Buildozer
+name: Build APK
 
 on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the repository
-      - name: Check out repository
-        uses: actions/checkout@v2
+      # Step 1: Checkout your repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # Step 2: Set up Python 3.12
-      - name: Set up Python 3.10
+      # Step 2: Set up Python 3.11
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: '3.11'
 
-      # Step 3: Install required dependencies
-      - name: Install required dependencies
+      # Step 3: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            libssl-dev \
-            libffi-dev \
-            python3-dev \
-            zip \
-            unzip \
-            openjdk-8-jdk \
-            libncurses5-dev \
-            libstdc++6 \
-            zlib1g-dev \
-            liblzma-dev \
-            pkg-config \
-            libsqlite3-dev \
-            libbz2-dev \
-            libreadline-dev \
-            libxml2-dev \
-            libxslt1-dev \
-            tk-dev \
-            python3-setuptools \
-            python3-pip \
-            curl \
-            git \
-            python3-distutils  # Install distutils explicitly
+          sudo apt update
+          sudo apt install -y \
+            python3.11-venv python3.11-distutils python3.11-dev \
+            build-essential libssl-dev libffi-dev zlib1g-dev \
+            openjdk-17-jdk unzip wget
+          sudo apt install -y libgl1-mesa-dev libgles2-mesa-dev
 
-      # Step 4: Reinstall distutils if not found (alternative to manual installation)
-      - name: Ensure distutils is available
+      # Step 4: Set up Buildozer dependencies
+      - name: Install Buildozer and dependencies
         run: |
-          python3 -m ensurepip --upgrade
-          python3 -m pip install --upgrade pip
-          sudo apt-get install --reinstall python3-distutils
+          python3.11 -m pip install --upgrade pip setuptools wheel
+          python3.11 -m pip install buildozer cython
 
-      # Step 5: Install JDK 17 (to resolve sdkmanager errors)
-      - name: Install JDK 17
+      # Step 5: Set up Android SDK
+      - name: Install Android SDK
         run: |
-          sudo apt-get install -y openjdk-17-jdk
-          java -version
+          mkdir -p $HOME/.buildozer/android/platform
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $HOME/.buildozer/android/platform/
+          mv $HOME/.buildozer/android/platform/cmdline-tools $HOME/.buildozer/android/platform/tools
+          echo "export ANDROID_HOME=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
+          echo "export PATH=$ANDROID_HOME/tools/bin:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
-      # Step 6: Set JAVA_HOME environment variable
-      - name: Set JAVA_HOME to JDK 17
+      # Step 6: Configure Buildozer
+      - name: Prepare Buildozer spec
         run: |
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-          echo "PATH=\$JAVA_HOME/bin:\$PATH" >> $GITHUB_ENV
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
 
-      # Step 7: Install unzip and make sure it's on the path
-      - name: Ensure unzip is available
-        run: |
-          which unzip || echo "unzip not found"
-          echo "PATH=\$PATH:/usr/bin" >> $GITHUB_ENV
-
-      # Step 8: Set up Android SDK manually
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 12266719
-          accept-android-sdk-licenses: true
-          log-accepted-android-sdk-licenses: true
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-
-      # Step 9: Install Android SDK components directly using sdkmanager
-      - name: Install Android SDK components
-        run: |
-          sdkmanager --update
-          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
-
-      # Step 10: Force Accept SDK licenses
-      - name: Accept SDK licenses
-        run: |
-          yes | sdkmanager --licenses
-
-      # Step 11: Set permissions for SDK folder
-      - name: Set permissions for SDK folder
-        run: |
-          sudo chown -R $USER:$USER /usr/local/lib/android/sdk
-          sudo chmod -R 755 /usr/local/lib/android/sdk
-
-      # Step 12: Verify Android SDK installation
-      - name: Verify Android SDK installation
-        run: |
-          echo "Listing installed SDK components"
-          sdkmanager --list
-
-      # Step 13: Install Buildozer and Cython
-      - name: Install Buildozer and Cython
-        run: |
-          python -m pip install cython
-          python -m pip install buildozer
-
-      # Step 14: Build APK
+      # Step 7: Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # Step 15: Upload APK as an artifact
-      - name: Upload APK artifact
+      # Step 8: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: my-apk
+          name: app-debug.apk
           path: bin/*.apk
