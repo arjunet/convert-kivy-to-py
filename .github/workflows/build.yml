@@ -47,7 +47,13 @@ jobs:
           mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
           yes | cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;33.0.0" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
 
-      # Step 6: Add Android SDK to PATH
+      # Step 6: Accept licenses
+      - name: Accept Android Licenses
+        run: |
+          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
+        shell: bash
+
+      # Step 7: Add Android SDK to PATH
       - name: Set environment variables
         run: |
           echo "export ANDROID_HOME=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
@@ -55,7 +61,7 @@ jobs:
           echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$HOME/.buildozer/android/platform/platform-tools:$PATH" >> $GITHUB_ENV
         shell: bash
 
-      # Step 7: Build the APK
+      # Step 8: Build the APK
       - name: Build APK
         run: |
           buildozer android debug
