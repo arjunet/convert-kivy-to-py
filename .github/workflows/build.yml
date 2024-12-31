@@ -55,11 +55,11 @@ jobs:
           echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
         shell: bash
 
-      # Step 7: Build APK with Debugging
+      # Step 7: Build APK
       - name: Build APK
         run: |
           # Accept licenses before building
-          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
+          while sleep 1; do echo "y"; done | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses || true
           # Debugging: List Android SDK directories
           echo "Listing Android SDK Directories:"
           ls -R ~/.buildozer/android/platform
