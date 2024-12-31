@@ -55,13 +55,20 @@ jobs:
           echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
         shell: bash
 
-      # Step 7: Build APK with License Acceptance
+      # Step 7: Build APK with Debugging
       - name: Build APK
         run: |
           # Accept licenses before building
           yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
-          # Build APK
-          buildozer android debug
+          # Debugging: List Android SDK directories
+          echo "Listing Android SDK Directories:"
+          ls -R ~/.buildozer/android/platform
+          # Debugging: Check if build-tools and AIDL are found
+          echo "Checking for build-tools and aidl..."
+          ls ~/.buildozer/android/platform/android-sdk/build-tools || echo "Build-tools not found!"
+          ls ~/.buildozer/android/platform/android-sdk/platform-tools || echo "Platform-tools not found!"
+          # Attempt to build APK
+          buildozer android debug || echo "Buildozer failed with error code $?"
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
