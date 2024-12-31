@@ -1,79 +1,42 @@
-name: Build APK
-
+name: CI
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
-      # Step 1: Checkout your repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+uses: actions/checkout@v2
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      used to cache dependencies with a timeout
+name: Get Date
+        id: get-date
+        run: |
+          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+        shell: bash
+
+name: Cache Buildozer global directory
+        uses: actions/cache@v2
         with:
-          python-version: "3.11"
+          path: .buildozer_global
+          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
 
-      # Step 3: Install required system packages (including Java 17)
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libffi-dev libssl-dev zlib1g-dev \
-              libbz2-dev libreadline-dev libsqlite3-dev curl llvm \
-              libncurses5-dev libncursesw5-dev xz-utils tk-dev \
-              libxml2-dev libxmlsec1-dev liblzma-dev zip unzip \
-              openjdk-17-jdk-headless
+uses: actions/cache@v2
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
 
-      # Step 4: Install Buildozer and dependencies
-      - name: Install Buildozer
-        run: |
-          pip install --upgrade pip
-          pip install buildozer cython==0.29.36
+name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: stable
 
-      # Step 5: Install Android SDK and NDK
-      - name: Install Android SDK and NDK
-        run: |
-          mkdir -p ~/.buildozer/android/platform
-          cd ~/.buildozer/android/platform
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-          unzip commandlinetools-linux-8512546_latest.zip -d cmdline-tools
-          mkdir -p cmdline-tools/latest
-          mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
-          cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;36.0.0-rc3" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
-
-      # Step 6: Set environment variables for Java and Android SDK
-      - name: Set environment variables
-        run: |
-          echo "export ANDROID_HOME=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
-          echo "export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
-          echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
-          echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-          echo "export PATH=/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH" >> $GITHUB_ENV
-        shell: bash
-
-      # Step 7: Build APK
-      - name: Build APK
-        run: |
-          # Automatically accept SDK licenses
-          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
-          # Debugging: List Android SDK directories
-          echo "Listing Android SDK Directories:"
-          ls -R ~/.buildozer/android/platform
-          # Debugging: Check if build-tools and AIDL are found
-          echo "Checking for build-tools and aidl..."
-          ls ~/.buildozer/android/platform/android-sdk/build-tools || echo "Build-tools not found!"
-          ls ~/.buildozer/android/platform/android-sdk/platform-tools || echo "Platform-tools not found!"
-          # Attempt to build APK
-          buildozer android debug || echo "Buildozer failed with error code $?"
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-        shell: bash
+name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: ${{ steps.buildozer.outputs.filename }}
