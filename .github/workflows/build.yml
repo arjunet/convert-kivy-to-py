@@ -45,12 +45,12 @@ jobs:
           unzip commandlinetools-linux-8512546_latest.zip -d cmdline-tools
           mkdir -p cmdline-tools/latest
           mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
-          yes | cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;33.0.0" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
+          cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;33.0.0" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
 
       # Step 6: Accept licenses
       - name: Accept Android Licenses
         run: |
-          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
+          while yes; do echo "Accepting licenses"; done | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses || true
         shell: bash
 
       # Step 7: Add Android SDK to PATH
