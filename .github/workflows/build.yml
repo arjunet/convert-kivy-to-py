@@ -50,7 +50,7 @@ jobs:
       # Step 6: Accept licenses
       - name: Accept Android Licenses
         run: |
-          while yes; do echo "Accepting licenses"; done | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
         shell: bash
 
       # Step 7: Add Android SDK to PATH
@@ -58,10 +58,4 @@ jobs:
         run: |
           echo "export ANDROID_HOME=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
           echo "export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
-          echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$HOME/.buildozer/android/platform/platform-tools:$PATH" >> $GITHUB_ENV
-        shell: bash
-
-      # Step 8: Build the APK
-      - name: Build APK
-        run: |
-          buildozer android debug
+          echo "export PATH=$HOME/.buildozer/android/platform/c
