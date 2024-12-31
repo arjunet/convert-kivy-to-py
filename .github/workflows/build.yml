@@ -21,16 +21,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Step 3: Install required system packages
+      # Step 3: Install required system packages (including Java 17)
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libffi-dev libssl-dev zlib1g-dev \
               libbz2-dev libreadline-dev libsqlite3-dev curl llvm \
               libncurses5-dev libncursesw5-dev xz-utils tk-dev \
-              libxml2-dev libxmlsec1-dev liblzma-dev zip unzip
+              libxml2-dev libxmlsec1-dev liblzma-dev zip unzip \
+              openjdk-17-jdk-headless
 
-      # Step 4: Install buildozer and dependencies
+      # Step 4: Install Buildozer and dependencies
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
@@ -47,12 +48,14 @@ jobs:
           mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
           cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;36.0.0-rc3" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
 
-      # Step 6: Add Android SDK to PATH
+      # Step 6: Set environment variables for Java and Android SDK
       - name: Set environment variables
         run: |
           echo "export ANDROID_HOME=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
           echo "export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
           echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+          echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          echo "export PATH=/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH" >> $GITHUB_ENV
         shell: bash
 
       # Step 7: Build APK
@@ -72,4 +75,5 @@ jobs:
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         shell: bash
