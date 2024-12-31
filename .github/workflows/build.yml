@@ -45,15 +45,9 @@ jobs:
           unzip commandlinetools-linux-8512546_latest.zip -d cmdline-tools
           mkdir -p cmdline-tools/latest
           mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
-          cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;33.0.0" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
+          cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform "platform-tools" "build-tools;36.0.0-rc3" "platforms;android-33" "ndk;23.1.7779620" "cmdline-tools;latest"
 
-      # Step 6: Accept licenses
-      - name: Accept Android Licenses
-        run: |
-          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        shell: bash
-
-      # Step 7: Add Android SDK to PATH
+      # Step 6: Add Android SDK to PATH
       - name: Set environment variables
         run: |
           echo "export ANDROID_HOME=$HOME/.buildozer/android/platform" >> $GITHUB_ENV
@@ -61,9 +55,12 @@ jobs:
           echo "export PATH=$HOME/.buildozer/android/platform/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
         shell: bash
 
-      # Step 8: Build APK
+      # Step 7: Build APK with License Acceptance
       - name: Build APK
         run: |
+          # Accept licenses before building
+          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
+          # Build APK
           buildozer android debug
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
