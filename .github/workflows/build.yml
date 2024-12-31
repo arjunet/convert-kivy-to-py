@@ -61,8 +61,8 @@ jobs:
       # Step 7: Build APK
       - name: Build APK
         run: |
-          # Accept licenses before building
-          while sleep 1; do echo "y"; done | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # Automatically accept SDK licenses
+          yes | $HOME/.buildozer/android/platform/cmdline-tools/latest/bin/sdkmanager --licenses
           # Debugging: List Android SDK directories
           echo "Listing Android SDK Directories:"
           ls -R ~/.buildozer/android/platform
